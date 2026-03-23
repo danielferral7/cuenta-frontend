@@ -14,7 +14,7 @@ export class EstadoService {
       return this.http.post(`${this.apiUrl}/estados/addMovimiento`, formData);
   }
 
-  apiUrl = '/api';  
+  apiUrl = 'https://cuentaapi20260322155911-gxcxhfatbuffgsdk.centralus-01.azurewebsites.net/api';  
 
   updateEstado(payload: any) {        
     console.log('actualizando estado'); 
