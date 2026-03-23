@@ -14,7 +14,7 @@ export class EstadoService {
       return this.http.post(`${this.apiUrl}/estados/addMovimiento`, formData);
   }
 
-  apiUrl = 'https://gentle-moss-04a726a0f.2.azurestaticapps.net/api';  
+  apiUrl = '/api';  
 
   updateEstado(payload: any) {        
     console.log('actualizando estado'); 
