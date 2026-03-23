@@ -1,0 +1,251 @@
+/* Fondo oscuro con blur */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Panel principal */
+.form-container {
+  position: relative;
+  background: #ffffff;
+  padding: 35px;
+  border-radius: 18px;
+  width: 520px;
+  max-width: 92%;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.25),
+    0 4px 10px rgba(0,0,0,0.08);
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  font-family: "Segoe UI", Roboto, sans-serif;
+
+  animation: aparecer 0.35s ease;
+}
+
+/* Animación */
+@keyframes aparecer {
+  from{
+    opacity:0;
+    transform: translateY(-20px) scale(.97);
+  }
+  to{
+    opacity:1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Título */
+.select-pdf{
+  top:25px;
+  padding: 20px;
+  margin: 10px;
+  box-shadow: 3px 3px 3px #222;
+  border: 1px solid #2e2e2e;
+  background-color: #3f3f3f;
+  width: 90%;
+  position: relative;
+  color: #ccc;
+  border-radius: 10px;
+  text-align:center;
+  h2{
+    margin-bottom:10px;
+    color:#1e293b;
+  }
+}
+
+.campo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* label a la izquierda */
+.campo label {
+  width: 180px;   /* ancho fijo para alinear todos */
+  font-weight: 600;
+  color: #334155;
+}
+
+/* input a la derecha */
+.campo input,
+.campo select {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background-color: white;
+}
+
+/* Inputs */
+input, select{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  font-size:14px;
+  transition: all .2s ease;
+}
+
+/* Focus elegante */
+input:focus, select:focus{
+  outline:none;
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,0.15);
+}
+
+
+/* Styling the container input field (the "textbox" area) */
+input[type="file"] {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 4px;
+  /* Additional styles for the "No file chosen" text can be limited */
+  color: #555;
+  background-color: #222; 
+  font-size: 16px;
+  width: 50%; /* Make it take the full width */
+}
+
+/* Styling the button part */
+input[type="file"]::file-selector-button {
+  background-color: #3f3f3f; /* Blue button color */
+  color: white; /* White text */
+  padding: 10px 15px; /* Button size */
+  border: none;
+  border-radius: 4px;
+  cursor: pointer; /* Change cursor to pointer on hover */
+  margin-right: 15px; /* Space between button and text */
+}
+
+/* Hover effect for the button */
+input[type="file"]::file-selector-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+
+/* Botón principal */
+button{
+   top:25%;
+        background-color: #2979AA;
+        padding:15px;
+        outline: none;
+        color:white;
+        cursor:pointer;
+        border-radius: 5px;
+        margin-top: 40px;
+        width: 15%;
+        text-align: center;
+}
+
+/* Hover botón */
+button:hover{
+  transform: translateY(-1px);
+  box-shadow:0 8px 20px rgba(37,99,235,0.35);
+}
+
+/* Botón deshabilitado */
+button:disabled{
+  background:#cbd5f5;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+/* Mensajes error */
+.error{
+  color:#dc2626;
+  font-size:12px;
+}
+
+/* Warning */
+.warning{
+  color:#f59e0b;
+  font-size:12px;
+  font-weight:500;
+}
+
+/* Input con warning */
+.monto-warning{
+  border:1px solid #f59e0b;
+  background:#fffbeb;
+}
+
+/* Línea divisoria */
+hr{
+  border:none;
+  border-top:1px solid #e5e7eb;
+  margin:10px 0;
+}
+
+.control_buttons
+{
+   
+   display: flex;
+  justify-content: center; /* O space-between, space-around, flex-start, flex-end */
+  gap: 10px; /* Espacio entre botones */
+  
+    .confirm_save{
+        
+        right:130px;
+        top:25%;
+        background-color: #2979AA;
+        padding:15px;
+        outline: none;
+        color:white;
+        cursor:pointer;
+        border-radius: 5px;
+        margin-top: 40px;
+        width: 50%;
+        text-align: center;
+
+    }
+
+    .discard_save{
+        right:130px;
+        top:25%;
+        background-color: #aa2929;
+        padding:15px;
+        outline: none;
+        color:white;
+        cursor:pointer;
+        border-radius: 5px;
+        margin-top: 40px;
+        width: 60%;
+        text-align: center;
+
+    }
+}
+
+/* botón cerrar */
+.close-btn{
+  position: absolute;
+  top: 12px;
+  right: 14px;
+
+  border: none;
+  background: transparent;
+
+  font-size: 20px;
+  font-weight: bold;
+
+  cursor: pointer;
+  color: #64748b;
+
+  transition: all .2s ease;
+}
+
+/* hover */
+.close-btn:hover{
+  color: #ef4444;
+  transform: scale(1.2);
+}

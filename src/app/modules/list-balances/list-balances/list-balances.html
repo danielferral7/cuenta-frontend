@@ -1,0 +1,24 @@
+
+<ng-container class="list">
+<h1 class="number_balances">Numero de cuentas: {{ this.balances.length}}</h1>
+<h2 class="title">Cuentas:</h2>
+<div class="flex">
+     <table>
+        <tr>
+            <th>Banco</th><th>Producto</th><th>Monto</th><th>Interes</th><th>Alerta</th>
+        </tr>
+       
+      <tr *ngFor="let b of balances">
+        <td>{{b.Banco}}</td>
+        <td>{{b.Producto}}</td>
+        <td>{{b.PagoNoIntereses}}</td>
+        
+        <td>{{b.EstadoAlerta}}</td>
+      </tr>
+    </table>  
+    </div>
+    <span *ngIf="balances.length === 0">
+        No hay cuentas
+    </span>
+</ng-container>
+<router-outlet></router-outlet>

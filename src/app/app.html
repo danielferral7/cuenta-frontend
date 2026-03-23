@@ -1,0 +1,34 @@
+<div class="topbar">
+  <button (click)="mostrar('inicio')" [class.activo]="panelActivo==='inicio'">
+    <span class="material-icons">home</span>
+    Inicio
+  </button>
+
+  <button (click)="mostrar('pdf')" [class.activo]="panelActivo==='pdf'">
+    <span class="material-icons">description</span>
+    Cargar PDF
+  </button>
+
+  <button (click)="mostrar('sync')" [class.activo]="panelActivo==='sync'">
+    <span class="material-icons">account_balance</span>
+    Sincronizar
+  </button>
+</div>
+
+<div class="contenido">
+
+  <div *ngIf="panelActivo==='inicio'">
+    <app-estados></app-estados>
+  </div>
+
+  <div *ngIf="panelActivo==='pdf'">
+    <app-pdf (panelPrev)="actualizarPropiedad($event)"></app-pdf>
+  </div>
+
+  <div *ngIf="panelActivo==='sync'">
+    <app-sincronizar></app-sincronizar>
+  </div>
+
+</div>
+<app-loader></app-loader>
+<router-outlet />

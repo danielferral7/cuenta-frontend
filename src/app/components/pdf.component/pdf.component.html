@@ -1,0 +1,109 @@
+
+
+    <div class="select-pdf">
+        <h2>Subir Estado de Cuenta</h2>
+        <input type="file" (change)="onFileSelected($event)" />
+        <button (click)="upload()" class="confirm_save">Subir PDF</button>
+       
+    </div>
+
+    <div class="overlay" *ngIf="mostrarFormulario"  (click)="cerrar()">
+
+     <div class="form-container" (click)="$event.stopPropagation()">
+
+     <button class="close-btn" (click)="cerrar()">✕</button>
+    
+    <form [formGroup]="cuentaForm" (ngSubmit)="guardar()">
+
+    <div class="campo">
+        <label>Banco</label>
+        <input type="text" formControlName="banco">
+        <div class="error" *ngIf="campoInvalido('banco')">
+        El banco es obligatorio
+        </div>
+    </div>
+
+    <div class="campo">
+        <label>Producto</label>
+        <input type="text" formControlName="producto" >
+
+        <div class="error" *ngIf="cuentaForm.get('producto')?.invalid">
+            El producto es obligatorio
+        </div>
+    </div>
+
+    <div class="campo">
+        <label>Tarjeta</label>
+        <input type="text" formControlName="tarjeta">
+
+        <div class="error" *ngIf="cuentaForm.get('tarjeta')?.invalid">
+            La tarjeta debe tener 16 dígitos
+        </div>
+    </div>
+
+    <div class="campo">
+        <label>CLABE</label>
+        <input type="text" formControlName="clabe">
+
+        <div class="error" *ngIf="cuentaForm.get('clabe')?.invalid">
+            La CLABE debe tener 18 dígitos
+        </div>
+    </div>
+
+    <div class="campo">
+        <label>Fecha de Corte</label>
+        <input type="date" formControlName="fechaCorte">
+
+        <div class="error" *ngIf="cuentaForm.get('fechaCorte')?.invalid">
+            La fecha de corte es obligatoria
+        </div>
+    </div>
+
+    <div class="campo">
+        <label>Fecha limite de pago</label>
+        <input type="date" formControlName="fechaLimitePago">
+
+        <div class="error" *ngIf="cuentaForm.get('fechaLimitePago')?.invalid">
+            La fecha limite de pago es obligatoria
+        </div>
+    </div>
+
+    <div class="campo">
+    <label>Pago sin intereses</label>
+    <input type="number" formControlName="pagoNoIntereses" [class.monto-warning]="esMontoCero('pagoNoIntereses')">
+    <div class="warning" *ngIf="esMontoCero('pagoNoIntereses')">
+        ⚠ El monto es 0
+    </div>
+    </div>
+
+    <div class="campo">
+    <label>Pago mínimo</label>
+    <input type="number" formControlName="pagoMinimo" [class.monto-warning]="esMontoCero('pagoMinimo')" step="0.01">
+    <div class="warning" *ngIf="esMontoCero('pagoMinimo')">
+        ⚠ El monto es 0
+    </div>
+    </div>
+
+    <div class="campo">
+    <label>Saldo total</label>
+    <input type="number" formControlName="saldoTotal" [class.monto-warning]="esMontoCero('saldoTotal')" step="0.01">
+    <div class="warning" *ngIf="esMontoCero('saldoTotal')">
+        ⚠ El monto es 0
+    </div>
+    </div>
+
+    <div class="campo">
+    <label>Limite de credito</label>
+    <input type="number" formControlName="limiteCredito" [class.monto-warning]="esMontoCero('limiteCredito')" step="0.01">
+    <div class="warning" *ngIf="esMontoCero('limiteCredito')">
+        ⚠ El monto es 0
+    </div>
+    </div>
+
+    <div class="control_buttons">
+        <button class="confirm_save" type="submit" >Guardar</button>
+    </div>
+
+    </form>   
+</div>
+    </div>
