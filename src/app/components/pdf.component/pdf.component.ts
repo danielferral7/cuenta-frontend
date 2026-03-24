@@ -40,11 +40,11 @@ export class PdfComponent
                 producto: ['', Validators.required],
                 tarjeta: ['', [
                     Validators.required,
-                    Validators.pattern(/^\d{16}$/)
+                    Validators.pattern(/^(\*{12})(\d{4})$/)
                 ]],
                 clabe: ['', [
                     Validators.required,
-                    Validators.pattern(/^\d{18}$/)
+                    Validators.pattern('^[A-Z0-9]{10,20}$')
                 ]],
                 fechaCorte: ['', [
                     Validators.required,
