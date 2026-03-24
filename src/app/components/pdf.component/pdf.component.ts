@@ -44,7 +44,7 @@ export class PdfComponent
                 ]],
                 clabe: ['', [
                     Validators.required,
-                    Validators.pattern('^[A-Z0-9]{10,20}$')
+                    Validators.pattern('^[A-Za-z0-9]{10,20}$') // acepta minúsculas
                 ]],
                 fechaCorte: ['', [
                     Validators.required,
