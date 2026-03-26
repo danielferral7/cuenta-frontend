@@ -71,9 +71,10 @@ export class EstadosComponent implements OnInit {
 
       data.forEach(e => {
 
-      
-        e.saldoTotal += e.movimientos.reduce((sum: number, m: any) => sum + m.monto, 0);
-        this.totalGastos += e.saldoTotal;
+      const gastosMes = e.movimientos.reduce((sum: number, m: any) => sum + m.monto, 0);
+        e.saldoTotal += gastosMes
+
+        this.totalGastos += gastosMes;
         
          if(!e.pagado){
 
