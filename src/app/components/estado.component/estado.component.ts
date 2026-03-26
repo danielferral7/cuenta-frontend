@@ -26,6 +26,7 @@ export class EstadosComponent implements OnInit {
   movimientoForm!: FormGroup;
 
   totalDeuda = 0
+  totalGastos = 0
   pagoMinimoTotal = 0
   pagosProximos = 0
   tarjetasRiesgo = 0
@@ -51,6 +52,7 @@ export class EstadosComponent implements OnInit {
     this.estados$.subscribe(data => {
 
       this.totalDeuda = 0
+      this.totalGastos = 0
       this.pagoMinimoTotal = 0
       this.pagosProximos = 0
       this.tarjetasRiesgo = 0
@@ -71,7 +73,7 @@ export class EstadosComponent implements OnInit {
 
       
         e.saldoTotal += e.movimientos.reduce((sum: number, m: any) => sum + m.monto, 0);
-
+        this.totalGastos += e.saldoTotal;
         
          if(!e.pagado){
 
@@ -300,6 +302,7 @@ actualizarPagado(e: any, pagado: boolean) {
 
   calcularMetricas() {
     this.totalDeuda = 0;
+    this.totalGastos = 0;
     this.pagoMinimoTotal = 0;
     this.pagosProximos = 0;
     this.tarjetasRiesgo = 0;
