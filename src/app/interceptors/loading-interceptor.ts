@@ -17,6 +17,8 @@ export class LoadingInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
     console.log('Interceptor ejecutado:', req.url);
+    console.log('REQ:', req.url);
+    console.log('HEADERS:', req.headers);
 
     // 🚫 Evitar interferir con MSAL
     if (req.url.includes('login.microsoftonline.com')) {
