@@ -3,7 +3,7 @@ import { PublicClientApplication, InteractionType } from '@azure/msal-browser';
 export const msalInstance = new PublicClientApplication({
   auth: {
     clientId: '2df1eeb1-6b22-4ac8-af11-54a92fbd3135',
-    authority: 'https://login.microsoftonline.com/common',
+    authority: 'https://login.microsoftonline.com/consumers',
     redirectUri: window.location.origin
   },
   cache: {
@@ -14,7 +14,7 @@ export const msalInstance = new PublicClientApplication({
 export const msalGuardConfig = {
    interactionType: InteractionType.Redirect,  // Usar Redirect
    authRequest: {
-    scopes: ['openid', 'profile', 'User.Read']
+    scopes: ['openid', 'profile', 'User.Read', 'api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation']
   }
 };
 
