@@ -12,7 +12,10 @@ export const msalInstance = new PublicClientApplication({
 });
 
 export const msalGuardConfig = {
-  interactionType: InteractionType.Redirect
+   interactionType: InteractionType.Redirect,  // Usar Redirect
+   authRequest: {
+    scopes: ['openid', 'profile', 'User.Read']
+  }
 };
 
 export const msalInterceptorConfig = {
