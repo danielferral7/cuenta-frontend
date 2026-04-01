@@ -98,8 +98,24 @@ async function bootstrap() {
 
   await msalService.instance.initialize();
 
-  const result = await msalService.instance.handleRedirectPromise();
+  let result = null;
 
+  try {
+    result = await msalService.instance.handleRedirectPromise();
+  } catch (error) {
+    console.warn('MSAL redirect error:', error);
+
+    // 🔥 LIMPIA ESTADO ROTO
+    sessionStorage.clear();
+    localStorage.removeItem('msal.interaction.status');
+  }
+
+  if (!msalService.instance.getActiveAccount()) {
+    console.log('🔐 Forzando login limpio...');
+    msalService.loginRedirect();
+    return;
+  }
+  
   console.log('Login result:', result);
   console.log('Active account BEFORE:', msalService.instance.getActiveAccount());
 
