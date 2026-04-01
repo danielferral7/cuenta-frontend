@@ -128,7 +128,7 @@ export class EstadosComponent implements OnInit {
 
       if (cortesVencidos.length > 0) {
         this.mostrarNotificacion(
-          `ℹ⚠️ Ya pasó la fecha de corte de: ${cortesVencidos.join(', ')}`,
+          `⚠️ Ya pasó la fecha de corte de: ${cortesVencidos.join(', ')}`,
           'info'
         );
       }
@@ -342,7 +342,7 @@ cerrarPanelGasto() {
   console.log(this.mostrarPanelGasto);
 }
 
-guardarGasto() {
+guardarGasto(card:any) {
 
    if (this.movimientoForm.invalid) { console.log('invalid data'); return; }
 
@@ -355,6 +355,11 @@ guardarGasto() {
   this.service.addMovimiento(data).subscribe(() => {
         setTimeout(() => {
               this.cerrarPanelGasto();
+              card.movimientos.push(data);
+               this.mostrarNotificacion(
+                  `✔ Se registró el gasto: ${data.descripcion} por $${data.monto}`,
+                  'info'
+                );
               console.log('guardado');
           }, 300);
         });

@@ -244,11 +244,9 @@
 
   <div class="panel" (click)="$event.stopPropagation()">
 
-    {{mostrarPanelGasto}}
-
     <h3>Agregar gasto</h3>
 
-    <form [formGroup]="movimientoForm"  (ngSubmit)="guardarGasto()">
+    <form [formGroup]="movimientoForm"  (ngSubmit)="guardarGasto(e)">
 
       <input type="hidden" formControlName="estadoCuentaId" />
       
