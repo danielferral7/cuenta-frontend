@@ -64,6 +64,9 @@ async function bootstrap() {
   // 🔐 MANEJO CORRECTO DEL REDIRECT DE MSAL
   const msalService = appRef.injector.get(MsalService);
 
+  // 🔥 INICIALIZAR MSAL (ESTO TE FALTABA)
+  await msalService.instance.initialize();
+
   const result = await msalService.instance.handleRedirectPromise();
 
   if (result && result.account) {

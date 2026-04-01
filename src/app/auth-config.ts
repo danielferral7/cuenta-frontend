@@ -3,8 +3,8 @@ import { PublicClientApplication, InteractionType } from '@azure/msal-browser';
 export const msalInstance = new PublicClientApplication({
   auth: {
     clientId: '2df1eeb1-6b22-4ac8-af11-54a92fbd3135',
-    authority: 'https://login.microsoftonline.com/TU_TENANT_ID',
-    redirectUri: 'http://localhost:4200'
+    authority: 'https://login.microsoftonline.com/common',
+    redirectUri: window.location.origin
   },
   cache: {
     cacheLocation: 'localStorage'
