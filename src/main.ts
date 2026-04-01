@@ -83,6 +83,7 @@ async function bootstrap() {
   await msalService.instance.initialize();
 
   const result = await msalService.instance.handleRedirectPromise();
+  console.log('Active account:', msalService.instance.getActiveAccount());
 
   if (result?.account) {
     msalService.instance.setActiveAccount(result.account);
