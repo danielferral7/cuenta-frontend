@@ -103,7 +103,7 @@ export class EstadosComponent implements OnInit, OnDestroy {
         scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
         account
       }).subscribe({
-        next: () => console.log('🔥 TOKEN OK'),
+        next: (result) => {  console.log('Token:', result.accessToken); },
         error: (err) => console.error('❌ ERROR TOKEN:', err)
       });
 
