@@ -6,22 +6,22 @@
 
   <div class="metric">
     <span>Total deuda</span>
-    <h3>{{totalDeuda | currency}}</h3>
+    <h3>{{ totalDeuda | currency }}</h3>
   </div>
 
   <div class="metric">
     <span>Pago mínimo total</span>
-    <h3>{{pagoMinimoTotal | currency}}</h3>
+    <h3>{{ pagoMinimoTotal | currency }}</h3>
   </div>
 
   <div class="metric warning">
     <span>Pagos próximos</span>
-    <h3>{{pagosProximos}}</h3>
+    <h3>{{ pagosProximos }}</h3>
   </div>
 
   <div class="metric danger">
     <span>Tarjetas en riesgo</span>
-    <h3>{{tarjetasRiesgo}}</h3>
+    <h3>{{ tarjetasRiesgo }}</h3>
   </div>
 
 </div>
@@ -29,7 +29,7 @@
 <!-- PANEL DE BARRAS -->
 <h3 class="resumen-title-arrow" (click)="toggleResumen()">
   Uso de credito por tarjeta
-  <span class="arrow">{{resumenOpen ? '▲' : '▼'}}</span>
+  <span class="arrow">{{ resumenOpen ? '▲' : '▼' }}</span>
 </h3>
 
 <div class="linear-bars" *ngIf="resumenOpen">
@@ -38,44 +38,45 @@
 
     <div class="row-usage">
       <div class="usage-name">
-        {{t.banco}} - {{t.producto}}
+        {{ t.banco }} - {{ t.producto }}
       </div>
 
       <div class="usage-fecha1">
-        {{t.fechaCorte}}
+        {{ t.fechaCorte }}
       </div>
 
       <div class="usage-monto">
-        Gastos del mes: <span class="monto-gastado" [ngClass]="getColorGasto(t)"> {{ t.movimientos.reduce((sum, m) => sum + m.monto, 0) | currency }} </span>
+        Gastos del mes:
+        <span class="monto-gastado" [ngClass]="getColorGasto(t)">
+          {{ getTotalMovimientos(t) | currency }}
+        </span>
       </div>
-  </div>
+    </div>
 
     <div class="usage">
-
       <div class="usage-label">
-        Uso {{getPorcentajeUso(t)}}%
+        Uso {{ getPorcentajeUso(t) }}%
       </div>
 
       <div class="usage-bar">
-
         <div 
           class="usage-progress"
           [style.width.%]="getPorcentajeUso(t)"
           [ngClass]="getColorUso(t)">
         </div>
-
       </div>
-
     </div>
 
   </div>
 
   <div class="total-usage-monto">
-        Gastos del mes: <span class="monto-gastado"> {{totalGastos | currency}} </span>
+    Gastos del mes:
+    <span class="monto-gastado">
+      {{ totalGastos | currency }}
+    </span>
   </div>
 
 </div>
-
 
 <h2>Tarjetas</h2>
 
@@ -83,251 +84,151 @@
 
   <div 
     class="card"
-    *ngFor="let e of estados$ | async; let i=index"
+    *ngFor="let e of estados$ | async; let i = index"
     (click)="toggle(e, $event)"
     [class.open]="e.open"
-    [style.zIndex]="e.open ? 999 : 100-i"
+    [style.zIndex]="e.open ? 999 : 100 - i"
     [style.top.px]="i * 30"
     [style.left.px]="e.open ? 0 : i * 20"
     [ngClass]="getBancoClass(e.banco)"
   >
-     <!-- BOTON REMOVER -->
-    <!-- <div 
-        class="remove"
-        (click)="remover(e, $event)"
-    >
-        🗑
-    </div> -->
 
-     <!-- CHECK PAGADO -->
-   <input 
+    <!-- CHECK PAGADO -->
+    <input 
       type="checkbox"
       class="pagado"
       title="Pagado"
       [checked]="e.pagado"
-      (change)="actualizarPagado(e, $event.target.checked)"
+      (change)="actualizarPagado(e, $any($event.target).checked)"
       (click)="$event.stopPropagation()"
-      *ngIf="e.open">
+      *ngIf="e.open"
+    >
 
-   <div class="card-header">
-
+    <div class="card-header">
       <div class="chip"></div>
-
       <div class="bank">
-        {{e.banco}}
+        {{ e.banco }}
       </div>
-
     </div>
 
     <div class="number">
-      **** **** **** {{e.tarjeta | slice:-4}}
+      **** **** **** {{ e.tarjeta | slice:-4 }}
     </div>
 
     <div class="product">
-      {{e.producto}}
+      {{ e.producto }}
     </div>
 
     <div class="card-body" *ngIf="e.open">
 
       <div class="row">
         <span>Pago mínimo</span>
-        <span class="money">{{e.pagoMinimo}}</span>
+        <span class="money">{{ e.pagoMinimo | currency }}</span>
       </div>
 
       <div class="row">
         <span>Pago sin intereses</span>
-        <span class="money">{{e.pagoNoIntereses}}</span>
+        <span class="money">{{ e.pagoNoIntereses | currency }}</span>
       </div>
 
       <div class="row">
         <span>Fecha límite</span>
-        <span>{{e.fechaLimitePago}}</span>
+        <span>{{ e.fechaLimitePago }}</span>
       </div>
 
       <div class="progress">
         <div 
           class="bar"
           [style.width.%]="getProgress(e.fechaLimitePago)"
-          [ngClass]="getAlertClass(e.fechaLimitePago)"
-        ></div>
+          [ngClass]="getAlertClass(e.fechaLimitePago)">
+        </div>
       </div>
 
       <div 
         class="alerta"
-        [ngClass]="getAlertClass(e.fechaLimitePago)"
-      >
-        {{getDiasRestantes(e.fechaLimitePago)}} días restantes
+        [ngClass]="getAlertClass(e.fechaLimitePago)">
+        {{ getDiasRestantes(e.fechaLimitePago) }} días restantes
       </div>
 
-        <!-- BOTON VER MAS -->
-  <div class="more-btn" (click)="toggleDetails(e, $event)">
-    {{ e.details ? 'Ver menos' : 'Ver más...' }}
-  </div>
+      <!-- BOTON VER MAS -->
+      <div class="more-btn" (click)="toggleDetails(e, $event)">
+        {{ e.details ? 'Ver menos' : 'Ver más...' }}
+      </div>
 
-  <!-- SECCION EXPANDIDA -->
-  <div class="card-details" *ngIf="e.details">
+      <!-- DETALLE -->
+      <div class="card-details" *ngIf="e.details">
 
-    <div class="row">
-      <span>Fecha de corte</span>
-      <span>{{e.fechaCorte}}</span>
+        <div class="row">
+          <span>Fecha de corte</span>
+          <span>{{ e.fechaCorte }}</span>
+        </div>
+
+        <div class="row">
+          <span>CLABE</span>
+          <span>{{ e.clabe }}</span>
+        </div>
+
+        <!-- BOTONES -->
+        <button
+          class="view-btn"
+          (click)="abrirPanelMovimiento(e, $event)">
+          👁
+        </button>
+
+        <button
+          class="add-btn"
+          (click)="abrirPanelGasto(e, $event)">
+          +
+        </button>
+
+      </div>
+
     </div>
 
-    <div class="row">
-      <span>CLABE</span>
-      <span>{{e.clabe}}</span>
-    </div>
+    <!-- PANEL GASTO -->
+    <div class="overlay" *ngIf="mostrarPanelGasto && e.open">
+      <div class="panel" (click)="$event.stopPropagation()">
 
-    <!-- GRAFICA CIRCULAR -->
-    <div class="credit-chart">
+        <h3>Agregar gasto</h3>
 
-      <div class="circle">
+        <form 
+          [formGroup]="movimientoForm"
+          (ngSubmit)="guardarGasto(e)">
 
-        <svg viewBox="0 0 36 36">
-
-          <path
-            class="bg"
-            d="M18 2.0845
-               a 15.9155 15.9155 0 0 1 0 31.831
-               a 15.9155 15.9155 0 0 1 0 -31.831"
-          />
-
-          <path
-            class="progress"
-            [ngClass]="getColorUso(e)"
-            [attr.stroke-dasharray]="getUsoCredito(e)"
-            d="M18 2.0845
-               a 15.9155 15.9155 0 0 1 0 31.831
-               a 15.9155 15.9155 0 0 1 0 -31.831"
-          />
-
-        </svg>
-
-        <div class="center">
-
-          <div class="label">Utilizado</div>
-
-          <div class="amount">
-            {{getDisponible(e) | currency}}
+          <input type="hidden" formControlName="estadoCuentaId" />
+          
+          <div class="campo">
+            <label>Monto</label>
+            <input 
+              type="number"
+              formControlName="monto"
+              [class.monto-warning]="esMontoCero('monto')"
+              step="0.01">
           </div>
 
-        </div>
+          <div class="campo">
+            <label>Descripción</label>
+            <input type="text" formControlName="descripcion">
+
+            <div class="error" *ngIf="movimientoForm.get('descripcion')?.touched && movimientoForm.get('descripcion')?.invalid">
+              Introduce descripción
+            </div>
+          </div>
+
+          <div class="control_buttons">
+            <button type="button" (click)="cerrarPanelGasto()">
+              Cancelar
+            </button>
+
+            <button type="submit">
+              Guardar
+            </button>
+          </div>
+
+        </form>
 
       </div>
-
     </div>
 
-     <!-- BOTON 👁 -->
-    <button
-      class="view-btn"
-      title="Ver movimientos"
-      (click)="abrirPanelMovimiento(e, $event)"
-    >
-      👁
-    </button>
-
-     <!-- BOTON + -->
-    <button
-      class="add-btn"
-      title="Agregar gasto"
-      (click)="abrirPanelGasto(e, $event)"
-    >
-      +
-    </button>
-
-
-
   </div>
-
 </div>
-
-<div class="overlay" *ngIf="mostrarPanelGasto && e.open">
-
-  <div class="panel" (click)="$event.stopPropagation()">
-
-    <h3>Agregar gasto</h3>
-
-    <form [formGroup]="movimientoForm"  (ngSubmit)="guardarGasto(e)">
-
-      <input type="hidden" formControlName="estadoCuentaId" />
-      
-      <div class="campo">
-      <label>Monto</label>
-      <input type="number" formControlName="monto" [class.monto-warning]="esMontoCero('monto')" step="0.01">
-      <div class="warning" *ngIf="esMontoCero('monto')">
-          ⚠ El monto es 0
-      </div>
-      </div>
-
-    <div class="campo">
-        <label>Descripcion</label>
-        <input type="text" formControlName="descripcion" >
-
-        <div class="error" *ngIf="movimientoForm.get('descripcion')?.invalid">
-            Introduce descripcion
-        </div>
-    </div>
-
-     <div class="control_buttons">
-        <button class="discard_save" type="button" (click)="cerrarPanelGasto()">Cancelar</button>
-        <button class="confirm_save" type="submit" (click)="cerrarPanelGasto()">Guardar</button>
-    </div>
-
-    </form>
-
-  </div>
-  </div>
-
-  <!--Panel Movimientos-->
-  <div class="overlay" *ngIf="mostrarPanelMovimiento && e.open">
-
-  <div class="panel" (click)="$event.stopPropagation()">
-
-    <h3>Movimientos</h3>
-
-    <div class="movimientos">
-
-      <div 
-        class="movimiento"
-        *ngFor="let m of movimientosSeleccionados"
-      >
-
-        <div class="mov-desc">
-          {{m.descripcion}}
-        </div>
-
-        <div class="mov-monto">
-          {{m.monto | currency}}
-        </div>
-
-      </div>
-      <hr>
-      <div class="movimiento">
-      <div class="mov-desc">
-          Total:
-        </div>
-
-        <div class="mov-monto">
-           {{ movimientosSeleccionados.reduce((sum, m) => sum + m.monto, 0) | currency }}
-        </div>
-
-      <div *ngIf="movimientosSeleccionados.length === 0" class="empty">
-        Sin movimientos
-      </div>
-</div>
-    </div>
-
-    <div class="control_buttons">
-
-      <button 
-        class="discard_save"
-        (click)="cerrarPanelMovimiento()"
-      >
-        Cerrar
-      </button>
-
-    </div>
-
-  </div>
-
-</div>
-
