@@ -50,7 +50,7 @@ async function bootstrap() {
       MsalGuard,
       MsalBroadcastService,
 
-      // 🔥 INTERCEPTOR MSAL (FIX COMPLETO)
+      // 🔥 MSAL INTERCEPTOR
       {
         provide: HTTP_INTERCEPTORS,
         useFactory: (
@@ -103,36 +103,35 @@ async function bootstrap() {
   try {
     result = await msalService.instance.handleRedirectPromise();
   } catch (error) {
-    console.warn('MSAL redirect error:', error);
-
-    // 🔥 LIMPIA ESTADO ROTO
-    sessionStorage.clear();
-    localStorage.removeItem('msal.interaction.status');
+    console.warn('MSAL redirect error (ignorado):', error);
   }
 
-  if (!msalService.instance.getActiveAccount()) {
-    console.log('🔐 Forzando login limpio...');
-    msalService.loginRedirect();
-    return;
-  }
-  
+  const accounts = msalService.instance.getAllAccounts();
+
   console.log('Login result:', result);
-  console.log('Active account BEFORE:', msalService.instance.getActiveAccount());
+  console.log('Accounts:', accounts);
 
+  // ✅ CASO 1: login recién hecho
   if (result?.account) {
     msalService.instance.setActiveAccount(result.account);
 
-    // 🔥 limpiar URL después de login
+    // limpiar URL
     window.history.replaceState({}, document.title, window.location.pathname);
-
-  } else {
-    const accounts = msalService.instance.getAllAccounts();
-    if (accounts.length > 0) {
-      msalService.instance.setActiveAccount(accounts[0]);
-    }
   }
 
-  console.log('Active account AFTER:', msalService.instance.getActiveAccount());
+  // ✅ CASO 2: sesión existente
+  else if (accounts.length > 0) {
+    msalService.instance.setActiveAccount(accounts[0]);
+  }
+
+  // ❌ SOLO si NO hay sesión → login
+  else {
+    console.log('🔐 No hay sesión, iniciando login...');
+    msalService.loginRedirect();
+    return;
+  }
+
+  console.log('Active account:', msalService.instance.getActiveAccount());
 }
 
 bootstrap();
