@@ -3,20 +3,19 @@ import { App } from './app/app';
 
 import {
   provideHttpClient,
-  withInterceptorsFromDi
+  withInterceptorsFromDi,
+  HTTP_INTERCEPTORS
 } from '@angular/common/http';
 
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { Location } from '@angular/common';
+
 import { LoadingInterceptor } from './app/interceptors/loading-interceptor';
 
 import {
   MsalService,
   MsalGuard,
   MsalInterceptor,
-  MsalBroadcastService
-} from '@azure/msal-angular';
-
-import {
+  MsalBroadcastService,
   MSAL_INSTANCE,
   MSAL_GUARD_CONFIG,
   MSAL_INTERCEPTOR_CONFIG
@@ -37,8 +36,10 @@ async function bootstrap() {
   const appRef = await bootstrapApplication(App, {
     providers: [
 
-      // 🔥 HTTP + INTERCEPTORS (CLAVE)
-      provideHttpClient(withInterceptorsFromDi()),
+      // 🔥 HTTP + INTERCEPTORS
+      provideHttpClient(
+        withInterceptorsFromDi()
+      ),
 
       // 🔐 MSAL CONFIG
       { provide: MSAL_INSTANCE, useValue: msalInstance },
@@ -47,14 +48,29 @@ async function bootstrap() {
 
       MsalService,
       MsalGuard,
-      MsalBroadcastService, // ✅ IMPORTANTE
+      MsalBroadcastService,
 
-      // 🔁 INTERCEPTORS (orden correcto)
+      // 🔥 INTERCEPTOR MSAL (FIX COMPLETO)
       {
         provide: HTTP_INTERCEPTORS,
-        useClass: MsalInterceptor,
-        multi: true
+        useFactory: (
+          msalService: MsalService,
+          msalBroadcastService: MsalBroadcastService,
+          location: Location
+        ) => {
+          return new MsalInterceptor(
+            msalInterceptorConfig,
+            msalService,
+            location,
+            msalBroadcastService,
+            document
+          );
+        },
+        multi: true,
+        deps: [MsalService, MsalBroadcastService, Location]
       },
+
+      // ⏳ Loader interceptor
       {
         provide: HTTP_INTERCEPTORS,
         useClass: LoadingInterceptor,
@@ -77,24 +93,30 @@ async function bootstrap() {
     ]
   });
 
-  // 🔐 INICIALIZAR MSAL CORRECTAMENTE
+  // 🔐 INICIALIZAR MSAL
   const msalService = appRef.injector.get(MsalService);
 
   await msalService.instance.initialize();
 
   const result = await msalService.instance.handleRedirectPromise();
-  console.log('Active account:', msalService.instance.getActiveAccount());
+
+  console.log('Login result:', result);
+  console.log('Active account BEFORE:', msalService.instance.getActiveAccount());
 
   if (result?.account) {
     msalService.instance.setActiveAccount(result.account);
-    // 🔥 LIMPIAR URL (CRÍTICO)
+
+    // 🔥 limpiar URL después de login
     window.history.replaceState({}, document.title, window.location.pathname);
+
   } else {
     const accounts = msalService.instance.getAllAccounts();
     if (accounts.length > 0) {
       msalService.instance.setActiveAccount(accounts[0]);
     }
   }
+
+  console.log('Active account AFTER:', msalService.instance.getActiveAccount());
 }
 
 bootstrap();

@@ -1,4 +1,5 @@
 import { PublicClientApplication, InteractionType } from '@azure/msal-browser';
+import { MsalInterceptorConfiguration } from '@azure/msal-angular';
 
 export const msalInstance = new PublicClientApplication({
   auth: {
@@ -21,8 +22,8 @@ export const msalGuardConfig = {
   }
 };
 
-export const msalInterceptorConfig = {
-  interactionType: InteractionType.Redirect,
+export const msalInterceptorConfig: MsalInterceptorConfiguration = {
+  interactionType: InteractionType.Redirect, // ✅ ahora sí tipado correcto
   protectedResourceMap: new Map([
     [
       'https://cuentaapi20260322155911-gxcxhfatbuffgsdk.centralus-01.azurewebsites.net/api/',
