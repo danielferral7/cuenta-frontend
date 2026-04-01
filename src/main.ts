@@ -36,10 +36,7 @@ async function bootstrap() {
   const appRef = await bootstrapApplication(App, {
     providers: [
 
-      // 🔥 HTTP + INTERCEPTORS
-      provideHttpClient(
-        withInterceptorsFromDi()
-      ),
+      provideHttpClient(withInterceptorsFromDi()),
 
       // 🔐 MSAL CONFIG
       { provide: MSAL_INSTANCE, useValue: msalInstance },
@@ -57,27 +54,25 @@ async function bootstrap() {
           msalService: MsalService,
           msalBroadcastService: MsalBroadcastService,
           location: Location
-        ) => {
-          return new MsalInterceptor(
-            msalInterceptorConfig,
-            msalService,
-            location,
-            msalBroadcastService,
-            document
-          );
-        },
+        ) => new MsalInterceptor(
+          msalInterceptorConfig,
+          msalService,
+          location,
+          msalBroadcastService,
+          document
+        ),
         multi: true,
         deps: [MsalService, MsalBroadcastService, Location]
       },
 
-      // ⏳ Loader interceptor
+      // ⏳ Loader
       {
         provide: HTTP_INTERCEPTORS,
         useClass: LoadingInterceptor,
         multi: true
       },
 
-      // 🌐 ROUTING
+      // 🌐 ROUTES (MsalGuard maneja login)
       provideRouter([
         {
           path: '',
@@ -93,7 +88,7 @@ async function bootstrap() {
     ]
   });
 
-  // 🔐 INICIALIZAR MSAL
+  // 🔐 INIT MSAL (SIN LOGIN MANUAL)
   const msalService = appRef.injector.get(MsalService);
 
   await msalService.instance.initialize();
@@ -111,25 +106,18 @@ async function bootstrap() {
   console.log('Login result:', result);
   console.log('Accounts:', accounts);
 
-  // ✅ CASO 1: login recién hecho
+  // ✅ login reciente
   if (result?.account) {
     msalService.instance.setActiveAccount(result.account);
-
-    // limpiar URL
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
-  // ✅ CASO 2: sesión existente
+  // ✅ sesión existente
   else if (accounts.length > 0) {
     msalService.instance.setActiveAccount(accounts[0]);
   }
 
-  // ❌ SOLO si NO hay sesión → login
-  else {
-    console.log('🔐 No hay sesión, iniciando login...');
-    msalService.loginRedirect();
-    return;
-  }
+  // ❌ NO login aquí → lo hace MsalGuard
 
   console.log('Active account:', msalService.instance.getActiveAccount());
 }
