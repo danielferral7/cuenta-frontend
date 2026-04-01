@@ -245,7 +245,7 @@
   <div class="panel" (click)="$event.stopPropagation()">
 
     {{mostrarPanelGasto}}
-    
+
     <h3>Agregar gasto</h3>
 
     <form [formGroup]="movimientoForm"  (ngSubmit)="guardarGasto()">
@@ -271,7 +271,7 @@
 
      <div class="control_buttons">
         <button class="discard_save" type="button" (click)="cerrarPanelGasto()">Cancelar</button>
-        <button class="confirm_save" type="submit" >Guardar</button>
+        <button class="confirm_save" type="submit" (click)="cerrarPanelGasto()">Guardar</button>
     </div>
 
     </form>
