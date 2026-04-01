@@ -5,34 +5,32 @@ import {
   HttpHandler,
   HttpEvent
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { from, Observable } from 'rxjs';
+import { finalize, switchMap } from 'rxjs/operators';
 import { LoaderService } from '../services/loader.service';
+import { MsalService } from '@azure/msal-angular';
 
 @Injectable()
 export class LoadingInterceptor implements HttpInterceptor {
 
-  constructor(private injector: Injector) {}
+  constructor(private injector: Injector,  private msalService: MsalService) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-
-
-  const token = localStorage.getItem('access_token'); // o desde MSAL
-  console.log('Token en interceptor:', token);
   
-  if (token) {
-    const cloned = req.clone({
-      headers: req.headers.set('Authorization', `Bearer ${token}`)
-    });
-    return next.handle(cloned);
-  }
-  return next.handle(req);
+    const account = this.msalService.instance.getActiveAccount();
+    if (!account) return next.handle(req);
 
-
-    console.log('Interceptor ejecutado:', req.url);
-    console.log('REQ:', req.url);
-    console.log('HEADERS:', req.headers);
-    console.log(req.headers.get('Authorization'));
+    return from(this.msalService.acquireTokenSilent({
+      account,
+      scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
+    })).pipe(
+      switchMap(tokenResponse => {
+        const authReq = req.clone({
+          setHeaders: { Authorization: `Bearer ${tokenResponse.accessToken}` }
+        });
+        return next.handle(authReq);
+      })
+    );
 
     // 🚫 Evitar interferir con MSAL
     if (req.url.includes('login.microsoftonline.com')) {
