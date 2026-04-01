@@ -1,12 +1,8 @@
+// main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
 
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-  HTTP_INTERCEPTORS
-} from '@angular/common/http';
-
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Location } from '@angular/common';
 
 import { LoadingInterceptor } from './app/interceptors/loading-interceptor';
@@ -36,9 +32,10 @@ async function bootstrap() {
   const appRef = await bootstrapApplication(App, {
     providers: [
 
+      // 🔑 HttpClient con interceptores DI
       provideHttpClient(withInterceptorsFromDi()),
 
-      // 🔐 MSAL CONFIG
+      // 🔐 MSAL
       { provide: MSAL_INSTANCE, useValue: msalInstance },
       { provide: MSAL_GUARD_CONFIG, useValue: msalGuardConfig },
       { provide: MSAL_INTERCEPTOR_CONFIG, useValue: msalInterceptorConfig },
@@ -47,32 +44,21 @@ async function bootstrap() {
       MsalGuard,
       MsalBroadcastService,
 
-      // 🔥 MSAL INTERCEPTOR
+      // 🔥 MSAL interceptor (maneja token)
       {
         provide: HTTP_INTERCEPTORS,
-        useFactory: (
-          msalService: MsalService,
-          msalBroadcastService: MsalBroadcastService,
-          location: Location
-        ) => new MsalInterceptor(
-          msalInterceptorConfig,
-          msalService,
-          location,
-          msalBroadcastService,
-          document
-        ),
-        multi: true,
-        deps: [MsalService, MsalBroadcastService, Location]
+        useClass: MsalInterceptor,
+        multi: true
       },
 
-      // ⏳ Loader
+      // ⏳ Loading interceptor
       {
         provide: HTTP_INTERCEPTORS,
         useClass: LoadingInterceptor,
         multi: true
       },
 
-      // 🌐 ROUTES (MsalGuard maneja login)
+      // 🌐 Rutas
       provideRouter([
         {
           path: '',
@@ -88,7 +74,7 @@ async function bootstrap() {
     ]
   });
 
-  // 🔐 INIT MSAL (SIN LOGIN MANUAL)
+  // 🔐 Inicialización MSAL
   const msalService = appRef.injector.get(MsalService);
 
   await msalService.instance.initialize();
@@ -103,21 +89,15 @@ async function bootstrap() {
 
   const accounts = msalService.instance.getAllAccounts();
 
-  console.log('Login result:', result);
-  console.log('Accounts:', accounts);
-
-  // ✅ login reciente
+  // ✅ Login reciente
   if (result?.account) {
     msalService.instance.setActiveAccount(result.account);
     window.history.replaceState({}, document.title, window.location.pathname);
   }
-
-  // ✅ sesión existente
+  // ✅ Sesión existente
   else if (accounts.length > 0) {
     msalService.instance.setActiveAccount(accounts[0]);
   }
-
-  // ❌ NO login aquí → lo hace MsalGuard
 
   console.log('Active account:', msalService.instance.getActiveAccount());
 }
