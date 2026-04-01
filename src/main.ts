@@ -12,6 +12,12 @@ import { provideRouter } from '@angular/router';
 import { HomeComponent } from './app/components/home.component/home.component';
 import { EstadosComponent } from './app/components/estado.component/estado.component';
 
+import {
+  MSAL_INSTANCE,
+  MSAL_GUARD_CONFIG,
+  MSAL_INTERCEPTOR_CONFIG
+} from '@azure/msal-angular';
+
 async function bootstrap() {
 
   const appRef = await bootstrapApplication(App, {
@@ -21,10 +27,9 @@ async function bootstrap() {
       provideHttpClient(withInterceptorsFromDi()),
 
       // ✅ MSAL CONFIG
-      { provide: 'MSAL_INSTANCE', useValue: msalInstance },
-      { provide: 'MSAL_GUARD_CONFIG', useValue: msalGuardConfig },
-      { provide: 'MSAL_INTERCEPTOR_CONFIG', useValue: msalInterceptorConfig },
-
+      { provide: MSAL_INSTANCE, useValue: msalInstance },
+      { provide: MSAL_GUARD_CONFIG, useValue: msalGuardConfig },
+      { provide: MSAL_INTERCEPTOR_CONFIG, useValue: msalInterceptorConfig },
       MsalService,
       MsalGuard,
 
