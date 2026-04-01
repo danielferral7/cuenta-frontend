@@ -5,6 +5,8 @@ import { Observable, Subject, switchMap, startWith, map, tap } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoaderService } from '../../services/loader.service';
+import { MsalService } from '@azure/msal-angular';
+import { AuthenticationResult } from '@azure/msal-browser';
 
 @Component({
   selector: 'app-estados',
@@ -38,7 +40,8 @@ export class EstadosComponent implements OnInit {
     private service: EstadoService,
     private snackBar: MatSnackBar,
     private fb: FormBuilder,
-    private injector: Injector
+    private injector: Injector,
+    private msal: MsalService
   ) {
     this.movimientoForm = this.fb.group({
       estadoCuentaId: 0,
@@ -47,7 +50,24 @@ export class EstadosComponent implements OnInit {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
+
+     const account = this.msal.instance.getActiveAccount();
+
+    if (!account) return;
+
+    this.msal.acquireTokenSilent({
+      scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
+      account
+    })
+    .subscribe({
+      next: (res: AuthenticationResult) => {
+        console.log('🔥 TOKEN:', res.accessToken);
+      },
+      error: (err) => {
+        console.error('❌ ERROR TOKEN:', err);
+      }
+    });
 
     const loader = this.injector.get(LoaderService);
 
