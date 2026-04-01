@@ -339,6 +339,7 @@ abrirPanelGasto(card: any, event: MouseEvent) {
 
 cerrarPanelGasto() {
   this.mostrarPanelGasto = false;
+  console.log(this.mostrarPanelGasto);
 }
 
 guardarGasto() {
@@ -353,8 +354,8 @@ guardarGasto() {
   // aquí puedes enviar al backend
   this.service.addMovimiento(data).subscribe(() => {
         setTimeout(() => {
-          this.cerrarPanelGasto();
-             console.log('guardado');
+              this.cerrarPanelGasto();
+              console.log('guardado');
           }, 300);
         });
      
