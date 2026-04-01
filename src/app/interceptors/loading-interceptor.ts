@@ -1,5 +1,11 @@
 import { Injectable, Injector } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler } from '@angular/common/http';
+import {
+  HttpInterceptor,
+  HttpRequest,
+  HttpHandler,
+  HttpEvent
+} from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { LoaderService } from '../services/loader.service';
 
@@ -8,11 +14,11 @@ export class LoadingInterceptor implements HttpInterceptor {
 
   constructor(private injector: Injector) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler) {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    console.log("Interceptor ejecutado");
-    console.log('REQ:', req.url);
+    console.log('Interceptor ejecutado:', req.url);
 
+    // 🚫 Evitar interferir con MSAL
     if (req.url.includes('login.microsoftonline.com')) {
       return next.handle(req);
     }
@@ -22,9 +28,7 @@ export class LoadingInterceptor implements HttpInterceptor {
     loader.show();
 
     return next.handle(req).pipe(
-      finalize(() => {
-        loader.hide();
-      })
+      finalize(() => loader.hide())
     );
   }
 }

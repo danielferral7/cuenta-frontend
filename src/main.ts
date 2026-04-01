@@ -1,16 +1,20 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
 
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi
+} from '@angular/common/http';
+
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { LoadingInterceptor } from './app/interceptors/loading-interceptor';
 
-import { MsalService, MsalGuard, MsalInterceptor } from '@azure/msal-angular';
-import { msalInstance, msalGuardConfig, msalInterceptorConfig } from './app/auth-config';
-
-import { provideRouter } from '@angular/router';
-import { HomeComponent } from './app/components/home.component/home.component';
-import { EstadosComponent } from './app/components/estado.component/estado.component';
+import {
+  MsalService,
+  MsalGuard,
+  MsalInterceptor,
+  MsalBroadcastService
+} from '@azure/msal-angular';
 
 import {
   MSAL_INSTANCE,
@@ -18,22 +22,34 @@ import {
   MSAL_INTERCEPTOR_CONFIG
 } from '@azure/msal-angular';
 
+import {
+  msalInstance,
+  msalGuardConfig,
+  msalInterceptorConfig
+} from './app/auth-config';
+
+import { provideRouter } from '@angular/router';
+import { HomeComponent } from './app/components/home.component/home.component';
+import { EstadosComponent } from './app/components/estado.component/estado.component';
+
 async function bootstrap() {
 
   const appRef = await bootstrapApplication(App, {
     providers: [
 
-      // ✅ HTTP CLIENT + INTERCEPTORS
+      // 🔥 HTTP + INTERCEPTORS (CLAVE)
       provideHttpClient(withInterceptorsFromDi()),
 
-      // ✅ MSAL CONFIG
+      // 🔐 MSAL CONFIG
       { provide: MSAL_INSTANCE, useValue: msalInstance },
       { provide: MSAL_GUARD_CONFIG, useValue: msalGuardConfig },
       { provide: MSAL_INTERCEPTOR_CONFIG, useValue: msalInterceptorConfig },
+
       MsalService,
       MsalGuard,
+      MsalBroadcastService, // ✅ IMPORTANTE
 
-      // ✅ INTERCEPTORS (orden correcto)
+      // 🔁 INTERCEPTORS (orden correcto)
       {
         provide: HTTP_INTERCEPTORS,
         useClass: MsalInterceptor,
@@ -45,7 +61,7 @@ async function bootstrap() {
         multi: true
       },
 
-      // ✅ ROUTES
+      // 🌐 ROUTING
       provideRouter([
         {
           path: '',
@@ -61,18 +77,16 @@ async function bootstrap() {
     ]
   });
 
-  // 🔐 MANEJO CORRECTO DEL REDIRECT DE MSAL
+  // 🔐 INICIALIZAR MSAL CORRECTAMENTE
   const msalService = appRef.injector.get(MsalService);
 
-  // 🔥 INICIALIZAR MSAL (ESTO TE FALTABA)
   await msalService.instance.initialize();
 
   const result = await msalService.instance.handleRedirectPromise();
 
-  if (result && result.account) {
+  if (result?.account) {
     msalService.instance.setActiveAccount(result.account);
   } else {
-    // fallback: si ya había sesión previa
     const accounts = msalService.instance.getAllAccounts();
     if (accounts.length > 0) {
       msalService.instance.setActiveAccount(accounts[0]);
