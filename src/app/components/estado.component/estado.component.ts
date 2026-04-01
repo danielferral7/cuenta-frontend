@@ -1,12 +1,24 @@
-import { Component, Injector, OnInit } from '@angular/core';
+import { Component, Injector, OnInit, OnDestroy } from '@angular/core';
 import { EstadoService } from '../../services/estado.service';
 import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
-import { Observable, Subject, switchMap, startWith, map, tap } from 'rxjs';
+import {
+  Observable,
+  Subject,
+  switchMap,
+  startWith,
+  map,
+  tap,
+  takeUntil,
+  finalize,
+  filter
+} from 'rxjs';
+
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoaderService } from '../../services/loader.service';
-import { MsalService } from '@azure/msal-angular';
-import { AuthenticationResult } from '@azure/msal-browser';
+
+import { MsalService, MsalBroadcastService } from '@azure/msal-angular';
+import { AuthenticationResult, InteractionStatus } from '@azure/msal-browser';
 
 @Component({
   selector: 'app-estados',
@@ -21,7 +33,7 @@ import { AuthenticationResult } from '@azure/msal-browser';
     MatSnackBarModule
   ]
 })
-export class EstadosComponent implements OnInit {
+export class EstadosComponent implements OnInit, OnDestroy {
 
   estados$!: Observable<any[]>;
   tarjetas$!: Observable<any[]>;
@@ -35,13 +47,15 @@ export class EstadosComponent implements OnInit {
   tarjetasRiesgo = 0;
 
   private refresh$ = new Subject<void>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private service: EstadoService,
     private snackBar: MatSnackBar,
     private fb: FormBuilder,
     private injector: Injector,
-    private msal: MsalService
+    private msal: MsalService,
+    private msalBroadcast: MsalBroadcastService
   ) {
     this.movimientoForm = this.fb.group({
       estadoCuentaId: 0,
@@ -50,24 +64,50 @@ export class EstadosComponent implements OnInit {
     });
   }
 
-  async ngOnInit() {
+  ngOnInit() {
 
-     const account = this.msal.instance.getActiveAccount();
+    // ✅ Esperar a que MSAL esté listo
+    this.msalBroadcast.inProgress$
+      .pipe(
+        filter(status => status === InteractionStatus.None),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
 
-    if (!account) return;
+        const account = this.msal.instance.getActiveAccount();
 
-    this.msal.acquireTokenSilent({
-      scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
-      account
-    })
-    .subscribe({
-      next: (res: AuthenticationResult) => {
-        console.log('🔥 TOKEN:', res.accessToken);
-      },
-      error: (err) => {
-        console.error('❌ ERROR TOKEN:', err);
-      }
-    });
+        if (!account) {
+          console.warn('❌ No hay cuenta activa');
+          return;
+        }
+
+        console.log('✅ MSAL listo:', account.username);
+
+        // 🔥 SOLO DEBUG (puedes quitar después)
+        this.msal.acquireTokenSilent({
+          scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
+          account
+        }).subscribe({
+          next: (res: AuthenticationResult) =>
+            console.log('🔥 TOKEN OK'),
+          error: (err) =>
+            console.error('❌ ERROR TOKEN:', err)
+        });
+
+      });
+
+    this.initData();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // =========================
+  // 🔄 INIT DATA
+  // =========================
+  initData() {
 
     const loader = this.injector.get(LoaderService);
 
@@ -75,19 +115,23 @@ export class EstadosComponent implements OnInit {
       startWith(void 0),
       switchMap(() => {
         loader.show();
-        return this.service.getEstados();
+
+        return this.service.getEstados().pipe(
+          finalize(() => loader.hide())
+        );
       }),
       map(data =>
         data.map(e => {
-          const gastosMes = e.movimientos?.reduce((sum: number, m: any) => sum + m.monto, 0) || 0;
+          const gastosMes =
+            e.movimientos?.reduce((sum: number, m: any) => sum + m.monto, 0) || 0;
+
           return {
             ...e,
             saldoTotal: e.saldoTotal + gastosMes,
             gastosMes
           };
         })
-      ),
-      tap(() => loader.hide())
+      )
     );
 
     this.buildTarjetas();
@@ -100,46 +144,43 @@ export class EstadosComponent implements OnInit {
   buildTarjetas() {
     this.tarjetas$ = this.estados$.pipe(
       map(tarjetas =>
-        [...tarjetas].sort((a, b) => {
-          const fechaA = new Date(a.fechaCorte);
-          const fechaB = new Date(b.fechaCorte);
-          return fechaA.getTime() - fechaB.getTime();
-        })
+        [...tarjetas].sort((a, b) =>
+          new Date(a.fechaCorte).getTime() - new Date(b.fechaCorte).getTime()
+        )
       )
     );
   }
 
   // =========================
-  // 📈 METRICAS
+  // 📈 METRICAS (SIN MEMORY LEAK)
   // =========================
   buildMetricas() {
-    this.estados$.subscribe(data => {
+    this.estados$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
 
-      this.totalDeuda = 0;
-      this.totalGastos = 0;
-      this.pagoMinimoTotal = 0;
-      this.pagosProximos = 0;
-      this.tarjetasRiesgo = 0;
+        this.totalDeuda = 0;
+        this.totalGastos = 0;
+        this.pagoMinimoTotal = 0;
+        this.pagosProximos = 0;
+        this.tarjetasRiesgo = 0;
 
-      const hoy = new Date();
-      hoy.setHours(0, 0, 0, 0);
+        data.forEach(e => {
 
-      data.forEach(e => {
+          this.totalGastos += e.gastosMes;
 
-        this.totalGastos += e.gastosMes;
+          if (!e.pagado) {
 
-        if (!e.pagado) {
+            this.totalDeuda += Number(e.pagoNoIntereses);
+            this.pagoMinimoTotal += Number(e.pagoMinimo);
 
-          this.totalDeuda += Number(e.pagoNoIntereses);
-          this.pagoMinimoTotal += Number(e.pagoMinimo);
+            const dias = this.getDiasRestantes(e.fechaLimitePago);
 
-          const dias = this.getDiasRestantes(e.fechaLimitePago);
-
-          if (dias <= 7 && dias > 0) this.pagosProximos++;
-          if (dias <= 1) this.tarjetasRiesgo++;
-        }
+            if (dias <= 7 && dias > 0) this.pagosProximos++;
+            if (dias <= 1) this.tarjetasRiesgo++;
+          }
+        });
       });
-    });
   }
 
   // =========================
@@ -179,18 +220,12 @@ export class EstadosComponent implements OnInit {
   // =========================
   // 💳 LOGICA TARJETA
   // =========================
-
   getTotalMovimientos(t: any): number {
     return t.movimientos?.reduce((sum: number, m: any) => sum + m.monto, 0) || 0;
   }
 
   getDisponible(card: any) {
     return card.limiteCredito - card.saldoTotal;
-  }
-
-  getUsoCredito(card: any) {
-    const usado = (card.saldoTotal / card.limiteCredito) * 100;
-    return `${usado}, 100`;
   }
 
   getPorcentajeUso(card: any) {
@@ -207,31 +242,6 @@ export class EstadosComponent implements OnInit {
     return 'uso-riesgo';
   }
 
-  getColorGasto(card: any) {
-    const gasto = card.gastosMes || 0;
-
-    if (gasto < 2000) return 'bajo';
-    if (gasto < 5000) return 'medio';
-    return 'alto';
-  }
-
-  getBancoClass(banco: string): string {
-    banco = banco.toLowerCase();
-
-    if (banco.includes('bbva')) return 'bbva';
-    if (banco.includes('santander')) return 'santander';
-    if (banco.includes('banorte')) return 'banorte';
-    if (banco.includes('hsbc')) return 'hsbc';
-    if (banco.includes('inbursa')) return 'inbursa';
-    if (banco.includes('plata')) return 'plata';
-    if (banco.includes('klar')) return 'klar';
-    if (banco.includes('nu')) return 'nu';
-    if (banco.includes('rappi')) return 'rappi';
-    if (banco.includes('uala')) return 'uala';
-
-    return 'default';
-  }
-
   // =========================
   // ⏱ FECHAS
   // =========================
@@ -240,12 +250,6 @@ export class EstadosComponent implements OnInit {
     const limite = new Date(fecha);
     const diff = limite.getTime() - hoy.getTime();
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
-  }
-
-  getProgress(fecha: string): number {
-    const dias = this.getDiasRestantes(fecha);
-    const ciclo = 30;
-    return Math.min(Math.max(100 - ((dias / ciclo) * 100), 0), 100);
   }
 
   getAlertClass(fecha: string): string {
@@ -263,10 +267,11 @@ export class EstadosComponent implements OnInit {
     const loader = this.injector.get(LoaderService);
     loader.show();
 
-    this.service.actualizarPagado(e.id, pagado).subscribe(() => {
-      loader.hide();
-      e.pagado = pagado;
-    });
+    this.service.actualizarPagado(e.id, pagado)
+      .pipe(finalize(() => loader.hide()))
+      .subscribe(() => {
+        e.pagado = pagado;
+      });
   }
 
   guardarGasto(card: any) {
@@ -281,21 +286,77 @@ export class EstadosComponent implements OnInit {
 
     loader.show();
 
-    this.service.addMovimiento(data).subscribe(() => {
+    this.service.addMovimiento(data)
+      .pipe(finalize(() => loader.hide()))
+      .subscribe(() => {
 
-      loader.hide();
+        card.movimientos.push(data);
 
-      card.movimientos.push(data);
+        this.cerrarPanelGasto();
 
-      this.cerrarPanelGasto();
-
-      this.mostrarNotificacion(
-        `✔ Gasto: ${data.descripcion} - $${data.monto}`,
-        'info'
-      );
-    });
+        this.mostrarNotificacion(
+          `✔ Gasto: ${data.descripcion} - $${data.monto}`,
+          'info'
+        );
+      });
   }
 
+  // =========================
+  // 🏦 BANCO (CSS CLASS)
+  // =========================
+  getBancoClass(banco: string): string {
+    if (!banco) return 'default';
+
+    banco = banco.toLowerCase();
+
+    if (banco.includes('bbva')) return 'bbva';
+    if (banco.includes('santander')) return 'santander';
+    if (banco.includes('banorte')) return 'banorte';
+    if (banco.includes('hsbc')) return 'hsbc';
+    if (banco.includes('inbursa')) return 'inbursa';
+    if (banco.includes('plata')) return 'plata';
+    if (banco.includes('klar')) return 'klar';
+    if (banco.includes('nu')) return 'nu';
+    if (banco.includes('rappi')) return 'rappi';
+    if (banco.includes('uala')) return 'uala';
+
+    return 'default';
+  }
+
+  // =========================
+  // 💸 COLOR GASTO
+  // =========================
+  getColorGasto(card: any): string {
+    const gasto = card.gastosMes || 0;
+
+    if (gasto < 2000) return 'bajo';
+    if (gasto < 5000) return 'medio';
+    return 'alto';
+  }
+
+  getProgress(fecha: string): number {
+    const dias = this.getDiasRestantes(fecha);
+    const ciclo = 30; // suponer ciclo de pago mensual
+    return Math.min(Math.max(100 - ((dias / ciclo) * 100), 0), 100);
+  }
+
+  // =========================
+  // 👁 MOVIMIENTOS
+  // =========================
+  mostrarPanelMovimiento = false;
+  movimientosSeleccionados: any[] = [];
+
+  abrirPanelMovimiento(card: any, event: MouseEvent) {
+    event.stopPropagation();
+
+    this.movimientosSeleccionados = card.movimientos || [];
+    this.mostrarPanelMovimiento = true;
+  }
+
+  cerrarPanelMovimiento() {
+    this.mostrarPanelMovimiento = false;
+  }
+  
   // =========================
   // 📦 PANEL GASTO
   // =========================
@@ -316,20 +377,11 @@ export class EstadosComponent implements OnInit {
   }
 
   // =========================
-  // 👁 MOVIMIENTOS
+  // ⚠ VALIDACIONES
   // =========================
-  mostrarPanelMovimiento = false;
-  movimientosSeleccionados: any[] = [];
-
-  abrirPanelMovimiento(card: any, event: MouseEvent) {
-    event.stopPropagation();
-
-    this.movimientosSeleccionados = card.movimientos || [];
-    this.mostrarPanelMovimiento = true;
-  }
-
-  cerrarPanelMovimiento() {
-    this.mostrarPanelMovimiento = false;
+  esMontoCero(campo: string): boolean {
+    const control = this.movimientoForm.get(campo);
+    return control?.value === 0;
   }
 
   // =========================
@@ -345,13 +397,5 @@ export class EstadosComponent implements OnInit {
       horizontalPosition: 'center',
       panelClass: [clase]
     });
-  }
-
-  // =========================
-  // ⚠ VALIDACIONES
-  // =========================
-  esMontoCero(campo: string): boolean {
-    const control = this.movimientoForm.get(campo);
-    return control?.value === 0;
   }
 }
