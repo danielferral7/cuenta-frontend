@@ -25,6 +25,7 @@ export class LoadingInterceptor implements HttpInterceptor {
       scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
     })).pipe(
       switchMap(tokenResponse => {
+        console.log('Token adquirido:', tokenResponse.accessToken);
         const authReq = req.clone({
           setHeaders: { Authorization: `Bearer ${tokenResponse.accessToken}` }
         });
