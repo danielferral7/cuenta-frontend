@@ -20,7 +20,14 @@ export const msalGuardConfig = {
 
 export const msalInterceptorConfig = {
   interactionType: InteractionType.Redirect,
-  protectedResourceMap: new Map([
-    ['https://localhost:5001/api', ['api://2df1eeb1-6b22-4ac8-af11-54a92fbd3135/access_as_user']]
+  protectedResourceMap: new Map<string, Array<string>>([
+    [
+      'https://graph.microsoft.com/v1.0/me',
+      ['User.Read']
+    ],
+    [
+      'https://cuentaapi20260322155911-gxcxhfatbuffgsdk.centralus-01.azurewebsites.net/',
+      ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation']
+    ]
   ])
 };

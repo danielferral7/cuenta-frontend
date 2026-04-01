@@ -1,4 +1,4 @@
-import { Component, Injectable, OnInit } from '@angular/core';
+import { Component, Injectable, Injector, OnInit } from '@angular/core';
 import { EstadoService } from '../../services/estado.service';
 import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
 import { Observable, Subject, switchMap, startWith, map } from 'rxjs';
@@ -34,7 +34,7 @@ export class EstadosComponent implements OnInit {
   private refresh$ = new Subject<void>();
   tarjetas$!: Observable<any[]>;
 
-  constructor(private service: EstadoService, private snackBar: MatSnackBar, private fb: FormBuilder, private loader: LoaderService) {
+  constructor(private service: EstadoService, private snackBar: MatSnackBar, private fb: FormBuilder, private injector: Injector) {
      this.movimientoForm = this.fb.group({
                 estadoCuentaId: 0,
                 monto: ['', Validators.min(0)],

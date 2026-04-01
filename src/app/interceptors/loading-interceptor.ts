@@ -11,6 +11,7 @@ export class LoadingInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler) {
 
     console.log("Interceptor ejecutado");
+    console.log('REQ:', req.url);
 
     if (req.url.includes('login.microsoftonline.com')) {
       return next.handle(req);
