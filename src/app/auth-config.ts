@@ -26,7 +26,7 @@ export const msalInterceptorConfig = {
       ['User.Read']
     ],
     [
-      'https://cuentaapi20260322155911-gxcxhfatbuffgsdk.centralus-01.azurewebsites.net/',
+      'https://cuentaapi20260322155911-gxcxhfatbuffgsdk.centralus-01.azurewebsites.net/api',
       ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation']
     ]
   ])

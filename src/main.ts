@@ -86,6 +86,8 @@ async function bootstrap() {
 
   if (result?.account) {
     msalService.instance.setActiveAccount(result.account);
+    // 🔥 LIMPIAR URL (CRÍTICO)
+    window.history.replaceState({}, document.title, window.location.pathname);
   } else {
     const accounts = msalService.instance.getAllAccounts();
     if (accounts.length > 0) {
