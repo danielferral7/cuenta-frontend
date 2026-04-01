@@ -19,6 +19,7 @@ export class LoadingInterceptor implements HttpInterceptor {
     console.log('Interceptor ejecutado:', req.url);
     console.log('REQ:', req.url);
     console.log('HEADERS:', req.headers);
+    console.log(req.headers.get('Authorization'));
 
     // 🚫 Evitar interferir con MSAL
     if (req.url.includes('login.microsoftonline.com')) {
