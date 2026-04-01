@@ -64,40 +64,53 @@ export class EstadosComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
 
-    // ✅ Esperar a que MSAL esté listo
-    this.msalBroadcast.inProgress$
-      .pipe(
-        filter(status => status === InteractionStatus.None),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(() => {
+    await this.msal.instance.initialize();
 
-        const account = this.msal.instance.getActiveAccount();
+    const result = await this.msal.instance.handleRedirectPromise();
 
-        if (!account) {
-          console.warn('❌ No hay cuenta activa');
-          return;
-        }
+    if (result?.account) {
+      this.msal.instance.setActiveAccount(result.account);
+    } else {
+      const accounts = this.msal.instance.getAllAccounts();
+      if (accounts.length > 0) {
+        this.msal.instance.setActiveAccount(accounts[0]);
+      }
+    }
 
-        console.log('✅ MSAL listo:', account.username);
+    this.listenMsal();
+  }
 
-        // 🔥 SOLO DEBUG (puedes quitar después)
-        this.msal.acquireTokenSilent({
-          scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
-          account
-        }).subscribe({
-          next: (res: AuthenticationResult) =>
-            console.log('🔥 TOKEN OK'),
-          error: (err) =>
-            console.error('❌ ERROR TOKEN:', err)
-        });
+  listenMsal() {
+  this.msalBroadcast.inProgress$
+    .pipe(
+      filter(status => status === InteractionStatus.None),
+      takeUntil(this.destroy$)
+    )
+    .subscribe(() => {
 
+      const account = this.msal.instance.getActiveAccount();
+
+      if (!account) {
+        console.warn('❌ No hay cuenta activa');
+        return;
+      }
+
+      console.log('✅ MSAL listo:', account.username);
+
+      this.msal.acquireTokenSilent({
+        scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
+        account
+      }).subscribe({
+        next: () => console.log('🔥 TOKEN OK'),
+        error: (err) => console.error('❌ ERROR TOKEN:', err)
       });
 
-    this.initData();
-  }
+    });
+
+  this.initData();
+}
 
   ngOnDestroy() {
     this.destroy$.next();
