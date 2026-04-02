@@ -3,6 +3,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { App } from './app/app';
 
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { Location } from '@angular/common';
 
 import { LoadingInterceptor } from './app/interceptors/loading-interceptor';
 
@@ -23,7 +24,7 @@ import {
 } from './app/auth-config';
 
 import { provideRouter } from '@angular/router';
-// import { HomeComponent } from './app/components/home.component/home.component';
+import { HomeComponent } from './app/components/home.component/home.component';
 import { EstadosComponent } from './app/components/estado.component/estado.component';
 import { PdfComponent } from './app/components/pdf.component/pdf.component';
 
@@ -62,7 +63,7 @@ async function bootstrap() {
       provideRouter([
         {
           path: '',
-          loadComponent: () => EstadosComponent,
+          loadComponent: () => HomeComponent,
           canActivate: [MsalGuard]
         },
         {

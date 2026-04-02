@@ -1,23 +1,23 @@
-// import { Component } from '@angular/core';
-// import { AuthService } from '../../services/auth.service';
+import { Component } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
 
-// @Component({
-//   standalone: true,
-//   selector: 'app-home',
-//   template: `
-//     <button (click)="login()">Login</button>
-//     <button (click)="logout()">Logout</button>
-//   `
-// })
-// export class HomeComponent {
+@Component({
+  standalone: true,
+  selector: 'app-home',
+  template: `
+    <button (click)="login()">Login</button>
+    <button (click)="logout()">Logout</button>
+  `
+})
+export class HomeComponent {
 
-//   constructor(private auth: AuthService) {}
+  constructor(private auth: AuthService) {}
 
-//   login() {
-//     this.auth.login();
-//   }
+  login() {
+    this.auth.login();
+  }
 
-//   logout() {
-//     this.auth.logout();
-//   }
-// }
+  logout() {
+    this.auth.logout();
+  }
+}
