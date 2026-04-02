@@ -6,9 +6,10 @@ import { PdfComponent } from "./components/pdf.component/pdf.component";
 import { SincronizarComponent } from "./components/sincronizar.component/sincronizar.component";
 import { NgIf } from '@angular/common';
 import { LoaderComponent } from './components/loader.component/loader.component';
-import { AccountInfo } from '@azure/msal-browser';
-import { MsalService } from '@azure/msal-angular';
+import { AccountInfo, InteractionStatus } from '@azure/msal-browser';
+import { MsalBroadcastService, MsalService } from '@azure/msal-angular';
 import { AuthService } from './services/auth.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +24,7 @@ export class App implements OnInit {
   /**
    *
    */
-  constructor(private msalService: MsalService, private authService: AuthService) {
+  constructor(private msalBroadcastService: MsalBroadcastService, private msalService: MsalService, private authService: AuthService) {
   
   }
   
@@ -40,21 +41,25 @@ export class App implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-     this.account = this.msalService.instance.getActiveAccount();
+  ngOnInit() {
 
-      if (!this.account) {
-        const accounts = this.msalService.instance.getAllAccounts();
-        if (accounts.length > 0) {
-          this.account = accounts[0];
-          this.msalService.instance.setActiveAccount(this.account);
+     this.msalBroadcastService.inProgress$
+      .pipe(filter(status => status === InteractionStatus.None))
+      .subscribe(() => {
+        const account = this.msalService.instance.getActiveAccount();
+
+        if (!account) {
+          const accounts = this.msalService.instance.getAllAccounts();
+          if (accounts.length > 0) {
+            this.msalService.instance.setActiveAccount(accounts[0]);
+          }
         }
-      }
 
-      this.userName = this.account?.name || '';
-      this.userEmail = this.account?.username || '';
+        this.userName = this.msalService.instance.getActiveAccount()?.name || '';
+        this.userEmail = this.msalService.instance.getActiveAccount()?.username || '';
+      });
 
-      this.cargarFoto();
+    this.cargarFoto();
   }
 
   protected readonly title = signal('CuentaFrontend');
