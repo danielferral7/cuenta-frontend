@@ -25,7 +25,7 @@ import { AuthenticationResult, InteractionStatus } from '@azure/msal-browser';
   templateUrl: './estado.component.html',
   styleUrl: './estado.component.scss',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  //changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgFor,
     ReactiveFormsModule,
