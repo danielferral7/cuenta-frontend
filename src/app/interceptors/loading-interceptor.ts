@@ -33,45 +33,43 @@ export class LoadingInterceptor implements HttpInterceptor {
 
     const account = this.msalService.instance.getActiveAccount();
 
-    if (!account) {
-      return next.handle(req).pipe(
-        finalize(() => this.handleFinalize(loader))
-      );
-    }
+    const request$ = account
+      ? from(this.msalService.acquireTokenSilent({
+          account,
+          scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
+        })).pipe(
+          switchMap(tokenResponse => {
+            const authReq = req.clone({
+              setHeaders: {
+                Authorization: `Bearer ${tokenResponse.accessToken}`
+              }
+            });
+            return next.handle(authReq);
+          }),
+          catchError(err => {
+            console.error('MSAL ERROR:', err);
+            return next.handle(req);
+          })
+        )
+      : next.handle(req);
 
-    return from(
-      this.msalService.acquireTokenSilent({
-        account,
-        scopes: ['api://7115c346-d789-46fa-9bd7-fa8a0510e3e1/user_impersonation'],
+    // 🔥 CLAVE: UN SOLO finalize global
+    return request$.pipe(
+      finalize(() => {
+        console.log('FINALIZE EJECUTADO');
+        this.totalRequests--;
+
+        if (this.totalRequests === 0) {
+          loader.hide();
+        }
       })
-    ).pipe(
-
-      switchMap(tokenResponse => {
-        const authReq = req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${tokenResponse.accessToken}`
-          }
-        });
-
-        return next.handle(authReq);
-      }),
-
-      catchError(err => {
-        console.error('MSAL error:', err);
-
-        // 👇 IMPORTANTE: mantener finalize
-        return next.handle(req).pipe(
-          finalize(() => this.handleFinalize(loader))
-        );
-      }),
-
-      finalize(() => this.handleFinalize(loader))
     );
   }
 
   private handleFinalize(loader: LoaderService) {
     this.totalRequests--;
 
+    console.log('Request finalizado. Pendientes:', this.totalRequests);
     if (this.totalRequests === 0) {
       loader.hide();
     }
