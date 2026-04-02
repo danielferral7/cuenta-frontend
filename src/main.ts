@@ -63,19 +63,19 @@ async function bootstrap() {
       provideRouter([
         {
           path: '',
-          loadComponent: () => HomeComponent,
-          canActivate: [MsalGuard]
-        },
-        {
-          path: 'estados',
           loadComponent: () => EstadosComponent,
           canActivate: [MsalGuard]
-        },
-        {
-          path: 'pdf/procesar',
-          loadComponent: () => PdfComponent,
-          canActivate: [MsalGuard]
         }
+        // {
+        //   path: 'estados',
+        //   loadComponent: () => EstadosComponent,
+        //   canActivate: [MsalGuard]
+        // },
+        // {
+        //   path: 'pdf/procesar',
+        //   loadComponent: () => PdfComponent,
+        //   canActivate: [MsalGuard]
+        // }
       ])
     ]
   });
