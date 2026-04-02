@@ -34,7 +34,7 @@
 
 <div class="linear-bars" *ngIf="resumenOpen">
 
-  <div class="usage-row" *ngFor="let t of tarjetas$ | async">
+  <div class="usage-row" *ngFor="let t of tarjetas$ | async; trackBy: trackById">
 
     <div class="row-usage">
       <div class="usage-name">
@@ -89,7 +89,7 @@
 
   <div 
     class="card"
-    *ngFor="let e of estados$ | async; let i=index"
+    *ngFor="let e of estados$ | async; trackBy: trackById; let i = index"
     (click)="toggle(e, $event)"
     [class.open]="e.open"
     [style.zIndex]="e.open ? 999 : 100-i"
@@ -299,7 +299,7 @@
 
       <div 
         class="movimiento"
-        *ngFor="let m of movimientosSeleccionados"
+        *ngFor="let m of movimientosSeleccionados; trackBy: trackById"
       >
 
         <div class="mov-desc">

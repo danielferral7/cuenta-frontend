@@ -1,4 +1,4 @@
-import { Component, Injector, OnInit, OnDestroy } from '@angular/core';
+import { Component, Injector, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { EstadoService } from '../../services/estado.service';
 import { AsyncPipe, CommonModule, NgFor } from '@angular/common';
 import {
@@ -25,6 +25,7 @@ import { AuthenticationResult, InteractionStatus } from '@azure/msal-browser';
   templateUrl: './estado.component.html',
   styleUrl: './estado.component.scss',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgFor,
     ReactiveFormsModule,
@@ -66,6 +67,7 @@ export class EstadosComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
 
+      console.log('init');
     await this.msal.instance.initialize();
 
     const result = await this.msal.instance.handleRedirectPromise();
@@ -113,8 +115,13 @@ export class EstadosComponent implements OnInit, OnDestroy {
 }
 
   ngOnDestroy() {
+    console.log('destroy');
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  trackById(index: number, item: any) {
+    return item.id;
   }
 
   // =========================

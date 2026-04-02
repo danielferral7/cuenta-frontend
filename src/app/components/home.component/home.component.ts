@@ -4,10 +4,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   standalone: true,
   selector: 'app-home',
-  template: `
-    <button (click)="login()">Login</button>
-    <button (click)="logout()">Logout</button>
-  `
+  template: ` `
 })
 export class HomeComponent {
 
