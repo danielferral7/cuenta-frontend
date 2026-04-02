@@ -20,11 +20,10 @@ export class LoadingInterceptor implements HttpInterceptor {
     private msalService: MsalService
   ) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+ intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
     const loader = this.injector.get(LoaderService);
 
-    // 🚫 1. Ignorar llamadas a MSAL
     if (req.url.includes('login.microsoftonline.com')) {
       return next.handle(req);
     }
@@ -34,14 +33,12 @@ export class LoadingInterceptor implements HttpInterceptor {
 
     const account = this.msalService.instance.getActiveAccount();
 
-    // 👉 2. Si NO hay sesión → continuar sin token
     if (!account) {
       return next.handle(req).pipe(
         finalize(() => this.handleFinalize(loader))
       );
     }
 
-    // 👉 3. Obtener token y continuar request
     return from(
       this.msalService.acquireTokenSilent({
         account,
@@ -50,7 +47,6 @@ export class LoadingInterceptor implements HttpInterceptor {
     ).pipe(
 
       switchMap(tokenResponse => {
-
         const authReq = req.clone({
           setHeaders: {
             Authorization: `Bearer ${tokenResponse.accessToken}`
@@ -61,10 +57,12 @@ export class LoadingInterceptor implements HttpInterceptor {
       }),
 
       catchError(err => {
-        console.error('Error token MSAL:', err);
+        console.error('MSAL error:', err);
 
-        // fallback sin token (opcional)
-        return next.handle(req);
+        // 👇 IMPORTANTE: mantener finalize
+        return next.handle(req).pipe(
+          finalize(() => this.handleFinalize(loader))
+        );
       }),
 
       finalize(() => this.handleFinalize(loader))
