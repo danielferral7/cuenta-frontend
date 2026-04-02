@@ -29,6 +29,7 @@ export class LoadingInterceptor implements HttpInterceptor {
     }
 
     this.totalRequests++;
+     console.log('Requests:', this.totalRequests);
     loader.show();
 
     const account = this.msalService.instance.getActiveAccount();
@@ -58,10 +59,10 @@ export class LoadingInterceptor implements HttpInterceptor {
       finalize(() => {
         console.log('FINALIZE EJECUTADO');
         this.totalRequests--;
-
-        if (this.totalRequests === 0) {
+        console.log('Request finalizado. Pendientes:', this.totalRequests);
+        //if (this.totalRequests === 0) {
           loader.hide();
-        }
+        //}
       })
     );
   }
