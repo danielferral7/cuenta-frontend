@@ -241,6 +241,11 @@ export class EstadosComponent implements OnInit, OnDestroy {
     return card.limiteCredito - card.saldoTotal;
   }
 
+  getUsoCredito(card: any) {
+    const usado = (card.saldoTotal / card.limiteCredito) * 100;
+    return `${usado}, 100`;
+  }
+
   getPorcentajeUso(card: any) {
     if (!card.limiteCredito) return 0;
     return Math.round((card.saldoTotal / card.limiteCredito) * 100);

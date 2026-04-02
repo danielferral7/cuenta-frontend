@@ -110,7 +110,8 @@ export class PdfComponent {
 
     const payload = {
       ...this.cuentaForm.value,
-      pagado: false
+      pagado: false,
+      azureOid: '' // TODO: obtener del token;
     };
 
     console.log('Payload:', payload);
