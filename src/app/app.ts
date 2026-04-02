@@ -90,7 +90,9 @@ export class App implements OnInit {
     this.panelActivo = valor;
   }
 
-  toggleMenu() {
+  toggleMenu(event: Event) {
+    event.stopPropagation(); // 🔥 clave
+    console.log('click menu');
     this.menuAbierto = !this.menuAbierto;
   }
 
