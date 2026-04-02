@@ -80,6 +80,7 @@ async function bootstrap() {
     ]
   });
 
+  
   // 🔐 Inicialización MSAL
   const msalService = appRef.injector.get(MsalService);
 
