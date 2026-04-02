@@ -13,6 +13,30 @@
     <span class="material-icons">account_balance</span>
     Sincronizar
   </button>
+
+  <div class="user-menu" (click)="toggleMenu()">
+    <img *ngIf="userPhotoUrl; else icono"
+        [src]="userPhotoUrl"
+        class="avatar" />
+
+    <ng-template #icono>
+      <span class="material-icons">account_circle</span>
+    </ng-template>
+
+    <span class="user-name">{{ userName }}</span>
+
+    <div class="dropdown" *ngIf="menuAbierto">
+      <div class="dropdown-item">
+        {{ userEmail }}
+      </div>
+
+      <div class="dropdown-item logout" (click)="logout($event)">
+        <span class="material-icons">logout</span>
+        Cerrar sesión
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <div class="contenido">
