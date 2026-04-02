@@ -26,6 +26,7 @@ import {
 import { provideRouter } from '@angular/router';
 import { HomeComponent } from './app/components/home.component/home.component';
 import { EstadosComponent } from './app/components/estado.component/estado.component';
+import { PdfComponent } from './app/components/pdf.component/pdf.component';
 
 async function bootstrap() {
 
@@ -68,6 +69,11 @@ async function bootstrap() {
         {
           path: 'estados',
           loadComponent: () => EstadosComponent,
+          canActivate: [MsalGuard]
+        },
+        {
+          path: 'procesar',
+          loadComponent: () => PdfComponent,
           canActivate: [MsalGuard]
         }
       ])
