@@ -1,14 +1,8 @@
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .topbar{
-  display:flex;
-  gap:10px;
-  padding:10px;
+   display: flex;
+  align-items: center;
+  justify-content: space-between; /* 🔥 clave */
+  padding: 0 16px;
   background:#1e1e1e;
 }
 
@@ -28,29 +22,42 @@
   background:#4caf50;
 }
 
-.topbar {
+/* IZQUIERDA */
+.left-menu {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: 10px;
 }
 
+/* DERECHA */
 .user-menu {
-  position: relative;
   display: flex;
   align-items: center;
-  cursor: pointer;
   gap: 8px;
+  cursor: pointer;
+  position: relative;
+}
+
+/* Avatar */
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  min-width: 200px;
+  z-index: 9999;
 }
 
 .user-name {
   font-weight: 500;
-}
-
-.dropdown {
-  position: absolute;
-  top: 40px;
-  right: 0;
-  z-index: 9999; /* 🔥 importante */
 }
 
 .dropdown-item {

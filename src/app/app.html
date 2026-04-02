@@ -1,24 +1,26 @@
 <div class="topbar">
-  <button (click)="mostrar('inicio')" [class.activo]="panelActivo==='inicio'">
-    <span class="material-icons">home</span>
-    Inicio
-  </button>
 
-  <button (click)="mostrar('pdf')" [class.activo]="panelActivo==='pdf'">
-    <span class="material-icons">description</span>
-    Cargar PDF
-  </button>
+  <div class="left-menu">
+    <button (click)="mostrar('inicio')" [class.activo]="panelActivo==='inicio'">
+      <span class="material-icons">home</span>
+      Inicio
+    </button>
 
-  <button (click)="mostrar('sync')" [class.activo]="panelActivo==='sync'">
-    <span class="material-icons">account_balance</span>
-    Sincronizar
-  </button>
+    <button (click)="mostrar('pdf')" [class.activo]="panelActivo==='pdf'">
+      <span class="material-icons">description</span>
+      Cargar PDF
+    </button>
+
+    <button (click)="mostrar('sync')" [class.activo]="panelActivo==='sync'">
+      <span class="material-icons">account_balance</span>
+      Sincronizar
+    </button>
+  </div>
 
   <div class="user-menu" (click)="toggleMenu($event)">
-    {{ menuAbierto }}
     <img *ngIf="userPhotoUrl; else icono"
-        [src]="userPhotoUrl"
-        class="avatar" />
+         [src]="userPhotoUrl"
+         class="avatar" />
 
     <ng-template #icono>
       <span class="material-icons">account_circle</span>
@@ -26,7 +28,7 @@
 
     <span class="user-name">{{ userName }}</span>
 
-    <div class="dropdown" *ngIf="menuAbierto">
+    <div class="dropdown" *ngIf="menuAbierto" (click)="$event.stopPropagation()">
       <div class="dropdown-item">
         {{ userEmail }}
       </div>
@@ -36,8 +38,8 @@
         Cerrar sesión
       </div>
     </div>
-
   </div>
+
 </div>
 
 <div class="contenido">
