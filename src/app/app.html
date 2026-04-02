@@ -14,6 +14,7 @@
     Sincronizar
   </button>
 
+  {{menuAbierto}}
   <div class="user-menu" (click)="toggleMenu()">
     <img *ngIf="userPhotoUrl; else icono"
         [src]="userPhotoUrl"
