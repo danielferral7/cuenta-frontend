@@ -72,7 +72,7 @@ async function bootstrap() {
           canActivate: [MsalGuard]
         },
         {
-          path: 'procesar',
+          path: 'pdf/procesar',
           loadComponent: () => PdfComponent,
           canActivate: [MsalGuard]
         }
